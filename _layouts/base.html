@@ -10,6 +10,18 @@
   <link href="{{ relative }}static/css/syntax.css" rel="stylesheet">
   <link href="{{ relative }}static/css/style.css" rel="stylesheet">
 
+  <script type="text/javascript" src="{{ relative }}static/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'] ],
+          processEscapes: true
+        },
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+
+      });
+  </script>
 
   <title>{{ page.title }}</title>
  </head>
