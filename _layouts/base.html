@@ -3,8 +3,14 @@
  <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="static/css/bootstrap.min.css" rel="stylesheet">
-  <link href="static/css/style.css" rel="stylesheet">
+
+  {% capture lvl %}{{ page.url | append:'index.html' | split:'/' | size }}{% endcapture %}
+  {% capture relative %}{% for i in (3..lvl) %}../{% endfor %}{% endcapture %}
+  <link href="{{ relative }}static/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{ relative }}static/css/syntax.css" rel="stylesheet">
+  <link href="{{ relative }}static/css/style.css" rel="stylesheet">
+
+
   <title>{{ page.title }}</title>
  </head>
 <body>
