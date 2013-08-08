@@ -27,4 +27,4 @@ body > .wrapper { height: auto; min-height: 100%; }
 
 /* MathJax - pygments fix */
 .math .mo,
-.math .mi { color: #333;}
+.math .mi { color: inherit}
