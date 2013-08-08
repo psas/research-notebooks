@@ -25,6 +25,23 @@ body > .wrapper { height: auto; min-height: 100%; }
     padding-top: 25px;
 }
 
+.highlight pre {
+    margin-bottom: 0;
+    border-radius: 4px 4px 0  0;
+}
+
+.output pre {
+    background: #eff5f8;
+    border: 1px solid #eee;
+    border-top: 0;
+    border-radius: 0 0 4px 4px;
+    padding-top: 25px;
+}
+
+.output .prompt {
+    color: #999;
+}
+
 /* MathJax - pygments fix */
 .math .mo,
 .math .mi { color: inherit}

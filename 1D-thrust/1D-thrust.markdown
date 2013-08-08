@@ -1,7 +1,6 @@
 ---
 layout: notebook
-name: thrust
-title: 1D Thrust
+title: 1D-thrust
 ---
 
 # 1D Thrust
@@ -35,5 +34,7 @@ print dv
 {% endhighlight %}
 
 <div class="output">
-2148.70176624
+<pre>
+<span class="prompt">&gt;</span> 2148.70176624
+</pre>
 </div>
