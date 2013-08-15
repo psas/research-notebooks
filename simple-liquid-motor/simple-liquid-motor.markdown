@@ -3,6 +3,7 @@ layout: notebook
 title: simple-liquid-motor
 ---
 
+
 # Liquid Rocket Motor Back Of The Envelope Calculations
 
 How much power does it take to run a small liquid rocket motor? Is it hundreds of Watts, or killoWatts? Does it take 500 liters of fuel?
@@ -13,13 +14,16 @@ Just to get a feel for the problem space and what small motors might look and ac
 
 To start off let's import `math` and set $g_0$ to the standard value.
 
+
 {% highlight python %}
 from math import pi
 g_0 = 9.8066
 {% endhighlight %}
+
 ## Define The Motor
 
 We want a ~2.5 kN LOX/kerosene motor. We can use the program [Rocket Propulsion Analysis](http://www.propulsion-analysis.com/) to do the basic thermodynamic and chemical equilibrium calculations for the given fuels. So we can start off with the following numbers:
+
 
 {% highlight python %}
 v_e = 2601.0   # m s-1    - Effective propellant velocity (from RPA)
@@ -29,6 +33,7 @@ P   =  3.5e6   # Pa       - Chamber pressure (set by us)
 O_r = 1146.0   # kg m-3   - Density of LOX
 F_r =  819.0   # kg m-3   - Density of T-1 (rocket grade kero, used in RPA sim)
 {% endhighlight %}
+
 ## Mass Flow Rate
 
 Thrust is directly proportional to the effective velocity, $v_e$ and the mass flow rate of the motor, $\dot m$.
@@ -37,13 +42,16 @@ $$\begin{equation}\text T = \dot m v_e\end{equation}$$
 
 So we can solve for total $\dot m$. Since we also know O/F (by mass) we can get out $\dot m_{ox}$ and $\dot m_f$ as well.
 
+
 {% highlight python %}
 mdot = T / v_e
 
 mdot_O = mdot / (1 + (1/OF))
 mdot_F = mdot / (1 + OF)
 {% endhighlight %}
+
 Using the density of the fluids involved we can find that
+
 
 {% highlight python %}
 flow_O = mdot_O / O_r  # m^3
@@ -56,6 +64,7 @@ print "We eat %0.2f L/s of LOX and %0.2f L/s of kerosene" % (flow_O * 1.0e3, flo
 <span class="prompt">&gt;</span> We eat 0.60 L/s of LOX and 0.33 L/s of kerosene
 </pre>
 </div>
+
 ## Motor Power
 
 Knowing the total $\dot m$ and $v_e$ also gets us the motor power. This is rarely used in rocketry because it's much more meaningful and direct to deal with thrust in Newtons instead of 'power' in Watts. Still, it's an interesting aside.
@@ -63,6 +72,7 @@ Knowing the total $\dot m$ and $v_e$ also gets us the motor power. This is rarel
 The motor power is effectivly the work done by the exiting gas:
 
 $$\begin{equation}\text{Pow}_{motor}= \frac{1}{2}\dot m {v_e}^2\end{equation}$$
+
 
 {% highlight python %}
 P_T = 0.5 * mdot * v_e**2
@@ -74,9 +84,11 @@ print "Motor ouput power: %0.1f MW" % (P_T / 1.0e6)
 <span class="prompt">&gt;</span> Motor ouput power: 3.3 MW
 </pre>
 </div>
+
 ## Burn Time
 
 Let's take a guess that we need 50 seconds of burn time to get to a reasonable altitude. We can then calculate the total mass of volume of fuel. Assuming a ~6 inch diameter airframe we can guess at tank size too.
+
 
 {% highlight python %}
 t_bo = 50               # s    - Burn time
@@ -105,6 +117,7 @@ print "Propelent tank height at %0.0f mm OD: %0.1f m" % (A_id*1.0e3, h)
 <span class="prompt">&gt;</span> Propelent tank height at 146 mm OD: 2.8 m
 </pre>
 </div>
+
 ## Pump Power
 
 Most interestingly we can guess at the pump shaft power nessisary for a motor of this class.
@@ -114,6 +127,7 @@ All pumps are less than ideal. So we always divide our moving propellant energy 
 $$\begin{equation}\text{Pow}_{pump} = \frac{\Delta \text{P} Q}{\eta}\end{equation}$$
 
 Where $\Delta\text P$ is the differental pressure (pump inlet -> outlet) and $Q$ is the fluid flowrate (m<sup>3</sup>&middot;s<sup>-1</sup>)
+
 
 {% highlight python %}
 nu = 0.6  # pump efficiency
@@ -135,6 +149,7 @@ print "    Total Power:               %0.1f kW" % ((Pow_O + Pow_F) / 1e3)
 <span class="prompt">&gt;</span>     Total Power:               5.4 kW
 </pre>
 </div>
+
 # Other Numbers
 
 We can also make a stab at less important but fun numbers.
@@ -142,6 +157,7 @@ We can also make a stab at less important but fun numbers.
 ## Propellant Costs
 
 Fuel is cheap. Insanely cheap. The best numbers I can find are bulk rates, so taking them and multiplying by 5 seems safe. The kerosene number is ~5$/gallon. Bascially pump prices. I hope these numbers a large overestimates. Still about a 200 times cheaper than AP!
+
 
 {% highlight python %}
 pc_O =  1.0 # $/kg
@@ -161,9 +177,11 @@ print "    Total:    $%0.2f" % ((Ox_m*pc_O) + (Fu_m*pc_F))
 <span class="prompt">&gt;</span>     Total:    $169.55
 </pre>
 </div>
+
 ## NAR Letter Code
 
 What kind of motor is this?
+
 
 {% highlight python %}
 NS = T * t_bo  # Ns   - total impulse
