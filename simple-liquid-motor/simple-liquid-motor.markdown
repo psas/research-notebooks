@@ -1,6 +1,6 @@
 ---
 layout: notebook
-title: simple-liquid-motor
+title: 
 ---
 
 
@@ -22,16 +22,18 @@ g_0 = 9.8066
 
 ## Define The Motor
 
-We want a ~2.5 kN LOX/kerosene motor. We can use the program [Rocket Propulsion Analysis](http://www.propulsion-analysis.com/) to do the basic thermodynamic and chemical equilibrium calculations for the given fuels. So we can start off with the following numbers:
+We want a ~2.5 kN LOX/ethanol motor. We can use the program [Rocket Propulsion Analysis](http://www.propulsion-analysis.com/) to do the basic thermodynamic and chemical equilibrium calculations for the given fuels. So we can start off with the following numbers:
 
 
 {% highlight python %}
-v_e = 2601.0   # m s-1    - Effective propellant velocity (from RPA)
+v_e = 2500.0   # m s-1    - Effective propellant velocity (from RPA)
 T   = 2500.0   # N        - Thrust (set by us)
-OF  =    2.56  #          - O/F Ratio, standard for LOX/kero
+OF  =    1.35  #          - O/F Ratio, (from RPA)
 P   =  3.5e6   # Pa       - Chamber pressure (set by us)
 O_r = 1146.0   # kg m-3   - Density of LOX
-F_r =  819.0   # kg m-3   - Density of T-1 (rocket grade kero, used in RPA sim)
+F_r =  789.0   # kg m-3   - Density of Ethanol
+F_w = 1000.0   # kg m-3   - Density of water
+F_r = F_r*0.7 + F_w*0.3 # density of 70% ethanol/water
 {% endhighlight %}
 
 ## Mass Flow Rate
@@ -56,12 +58,14 @@ Using the density of the fluids involved we can find that
 {% highlight python %}
 flow_O = mdot_O / O_r  # m^3
 flow_F = mdot_F / F_r  # m^3
-print "We eat %0.2f L/s of LOX and %0.2f L/s of kerosene" % (flow_O * 1.0e3, flow_F * 1.0e3) # convert m3 to L
+print "We eat %0.2f L/s of LOX and %0.2f L/s of Ethanol" % (flow_O * 1.0e3, flow_F * 1.0e3) # convert m3 to L
+print "(%0.2f kg/s of LOX and %0.2f kg/s of Ethanol)" % (mdot_O, mdot_F)
 {% endhighlight %}
 
 <div class="output">
 <pre>
-<span class="prompt">&gt;</span> We eat 0.60 L/s of LOX and 0.33 L/s of kerosene
+<span class="prompt">&gt;</span> We eat 0.50 L/s of LOX and 0.50 L/s of Ethanol
+<span class="prompt">&gt;</span> (0.57 kg/s of LOX and 0.43 kg/s of Ethanol)
 </pre>
 </div>
 
@@ -81,40 +85,46 @@ print "Motor ouput power: %0.1f MW" % (P_T / 1.0e6)
 
 <div class="output">
 <pre>
-<span class="prompt">&gt;</span> Motor ouput power: 3.3 MW
+<span class="prompt">&gt;</span> Motor ouput power: 3.1 MW
 </pre>
 </div>
 
 ## Burn Time
 
-Let's take a guess that we need 50 seconds of burn time to get to a reasonable altitude. We can then calculate the total mass of volume of fuel. Assuming a ~6 inch diameter airframe we can guess at tank size too.
+Let's start with 30 seconds of burn time. We can then calculate the total mass of volume of fuel. Assuming a ~6 inch diameter airframe we can guess at tank size too.
 
 
 {% highlight python %}
-t_bo = 50               # s    - Burn time
-A_id =  0.146           # m    - airframe ID (6" OD, 1/8" walls)
+t_bo = 30               # s    - Burn time
+A_id =  0.152           # m    - airframe ID
 
 Ox_m = (mdot_O * t_bo)  # kg
 Fu_m = (mdot_F * t_bo)  # kg
 Ox_v = (Ox_m/O_r)       # m3
 Fu_v = (Fu_m/F_r)       # m3
 
+h_Ox = Ox_v / (pi*(A_id/2.0)**2)       # LOX tank size
+h_Fu = Fu_v / (pi*(A_id/2.0)**2)       # Ethanol tank size
 h = (Ox_v + Fu_v)/(pi*(A_id/2.0)**2)  # Total tank length
 
 print "Fuel for a %0.0f second burn time:" % t_bo
 print "    LOX:        %0.1f Liters (%4.1f kg)" % (Ox_v * 1.0e3, Ox_m)
-print "    Kerosene:   %0.1f Liters (%4.1f kg)" % (Fu_v * 1.0e3, Fu_m)
+print "    Ethanol:    %0.1f Liters (%4.1f kg)" % (Fu_v * 1.0e3, Fu_m)
 print "    Total prop: %0.1f Liters (%4.1f kg)" % ((Ox_v + Fu_v) * 1.0e3, Ox_m+Fu_m)
-print "Propelent tank height at %0.0f mm OD: %0.1f m" % (A_id*1.0e3, h)
+print "LOX tank length:     %0.3f m" % (h_Ox)
+print "Ethanol tank length: %0.3f m" % (h_Fu)
+print "Total propelent tank height at %0.0f mm OD: %0.1f m" % (A_id*1.0e3, h)
 {% endhighlight %}
 
 <div class="output">
 <pre>
-<span class="prompt">&gt;</span> Fuel for a 50 second burn time:
-<span class="prompt">&gt;</span>     LOX:        30.2 Liters (34.6 kg)
-<span class="prompt">&gt;</span>     Kerosene:   16.5 Liters (13.5 kg)
-<span class="prompt">&gt;</span>     Total prop: 46.6 Liters (48.1 kg)
-<span class="prompt">&gt;</span> Propelent tank height at 146 mm OD: 2.8 m
+<span class="prompt">&gt;</span> Fuel for a 30 second burn time:
+<span class="prompt">&gt;</span>     LOX:        15.0 Liters (17.2 kg)
+<span class="prompt">&gt;</span>     Ethanol:    15.0 Liters (12.8 kg)
+<span class="prompt">&gt;</span>     Total prop: 30.0 Liters (30.0 kg)
+<span class="prompt">&gt;</span> LOX tank length:     0.829 m
+<span class="prompt">&gt;</span> Ethanol tank length: 0.825 m
+<span class="prompt">&gt;</span> Total propelent tank height at 152 mm OD: 1.7 m
 </pre>
 </div>
 
@@ -144,9 +154,9 @@ print "    Total Power:               %0.1f kW" % ((Pow_O + Pow_F) / 1e3)
 <div class="output">
 <pre>
 <span class="prompt">&gt;</span> Pump Stats:
-<span class="prompt">&gt;</span>     Oxidizer pump shaft power: 3.5 kW
-<span class="prompt">&gt;</span>     Fuel pump shaft power:     1.9 kW
-<span class="prompt">&gt;</span>     Total Power:               5.4 kW
+<span class="prompt">&gt;</span>     Oxidizer pump shaft power: 2.9 kW
+<span class="prompt">&gt;</span>     Fuel pump shaft power:     2.9 kW
+<span class="prompt">&gt;</span>     Total Power:               5.8 kW
 </pre>
 </div>
 
@@ -156,25 +166,25 @@ We can also make a stab at less important but fun numbers.
 
 ## Propellant Costs
 
-Fuel is cheap. Insanely cheap. The best numbers I can find are bulk rates, so taking them and multiplying by 5 seems safe. The kerosene number is ~5$/gallon. Bascially pump prices. I hope these numbers a large overestimates. Still about a 200 times cheaper than AP!
+Fuel is cheap. Insanely cheap.
 
 
 {% highlight python %}
-pc_O =  1.0 # $/kg
-pc_F = 10.0 # $/kg
+pc_O =  2.0 # $/kg  ???
+pc_F =  2.0 # $/kg  ???
 
 print "Price:"
 print "    LOX:      $%0.2f" % (Ox_m*pc_O)
-print "    Kerosene: $%0.2f" % (Fu_m*pc_F)
+print "    Ethanol:  $%0.2f" % (Fu_m*pc_F)
 print "    Total:    $%0.2f" % ((Ox_m*pc_O) + (Fu_m*pc_F))
 {% endhighlight %}
 
 <div class="output">
 <pre>
 <span class="prompt">&gt;</span> Price:
-<span class="prompt">&gt;</span>     LOX:      $34.56
-<span class="prompt">&gt;</span>     Kerosene: $135.00
-<span class="prompt">&gt;</span>     Total:    $169.55
+<span class="prompt">&gt;</span>     LOX:      $34.47
+<span class="prompt">&gt;</span>     Ethanol:  $25.53
+<span class="prompt">&gt;</span>     Total:    $60.00
 </pre>
 </div>
 
@@ -192,12 +202,13 @@ for i in xrange(26):
         letter = chr(ord('A')+i)
         break
     l = l*2
-    
-print "Motor letter designation: %s (%0.0f Ns)" % (letter, NS)
+
+percent = NS/l
+print "Motor letter designation: %s (%0.0f Ns, %0.0f%%)" % (letter, NS, percent*100)
 {% endhighlight %}
 
 <div class="output">
 <pre>
-<span class="prompt">&gt;</span> Motor letter designation: Q (125000 Ns)
+<span class="prompt">&gt;</span> Motor letter designation: P (75000 Ns, 92%)
 </pre>
 </div>
